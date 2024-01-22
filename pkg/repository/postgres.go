@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	userTable       = "user"
+	userTable       = "users"
 	todoListsTable  = "todo_list"
 	userListsTable  = "user_lists"
 	todoItemsTable  = "todo_items"
