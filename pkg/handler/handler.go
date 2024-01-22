@@ -40,7 +40,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				items.PUT("/:item_id", h.updateItem)
 				items.DELETE("/:item_id", h.deleteItem)
 			}
-		}
+		} //closeup venture
 	}
 	return router
 }

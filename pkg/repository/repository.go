@@ -1,6 +1,12 @@
 package repository
 
+import (
+	"github.com/kkosim/todo-app"
+	"gorm.io/gorm"
+)
+
 type Authorization interface {
+	CreateUser(user todo.User) (int, error)
 }
 
 type TodoList interface {
@@ -15,6 +21,8 @@ type Repository struct {
 	TodoItem
 }
 
-func NewRepository() *Repository {
-	return &Repository{}
+func NewRepository(db *gorm.DB) *Repository {
+	return &Repository{
+		Authorization: newAuthPostgres(db),
+	}
 }
