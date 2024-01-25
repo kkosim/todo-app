@@ -69,7 +69,7 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 
 	}
 	//str:= claims["userid"]
-	fmt.Println(claims.UserId)
+	//fmt.Println(claims.UserId)
 	return claims.UserId, nil
 
 }
