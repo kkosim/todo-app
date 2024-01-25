@@ -29,7 +29,20 @@ func (r *AuthPostgres) CreateUser(user todo.User) (int, error) {
 	if err != nil {
 		logrus.Error("couldn't create new user")
 	}
-	//row.Find(&id)
+
+	//err := r.db.Table(userTable).Create(userAuth{
+	//	name:     user.Name,
+	//	username: user.Username,
+	//	password: user.Password,
+	//}).Error
+	//
+	//if err == nil {
+	//	id = user.Id
+	//}
+	//if err != nil {
+	//	logrus.Error("couldn't create new user")
+	//}
+	//
 	return id, nil
 }
 
