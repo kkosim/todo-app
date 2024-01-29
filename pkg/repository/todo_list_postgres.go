@@ -5,7 +5,6 @@ import (
 	"github.com/kkosim/todo-app"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"log"
 	"strings"
 )
 
@@ -65,7 +64,7 @@ func (r *TodoListPostgres) Delete(userId int, listId int) error {
 	return err
 }
 
-func (r *TodoListPostgres) Update(userId int, listId int, input todo.UpdateListInput) error {
+func (r *TodoItemPostgres) Update(userId int, itemId int, input todo.UpdateItemInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argId := 1
@@ -82,18 +81,24 @@ func (r *TodoListPostgres) Update(userId int, listId int, input todo.UpdateListI
 		argId++
 	}
 
+	if input.Done != nil {
+		setValues = append(setValues, fmt.Sprintf("done=$%d", argId))
+		args = append(args, *input.Done)
+		argId++
+	}
+
 	//title = $1
 	//description = $1
 	//title = $1 description = $2
 	setQuery := strings.Join(setValues, ", ")
 
-	query := fmt.Sprintf("update %s tl set %s from %s ul "+
-		"where tl.id=ul.list_id and ul.list_id=$%d and ul.user_id=$%d",
-		todoListsTable, setQuery, userListsTable, argId, argId+1)
-	args = append(args, listId, userId)
+	query := fmt.Sprintf("update %s ti set %s from %s li, %s ul "+
+		"where ti.id=li.item_id and li.list_id=ul.list_id and ul.user_id=$%d and ti.id = $%d",
+		todoItemsTable, setQuery, listsItemsTable, userListsTable, argId, argId+1)
+	args = append(args, userId, itemId)
 
-	log.Println("updateQuery: ", query)
-	log.Println("args: ", args)
+	//log.Println("updateQuery: ", query)
+	//log.Println("args: ", args)
 
 	err := r.db.Exec(query, args...).Error
 	//err.Save()

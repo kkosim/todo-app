@@ -21,8 +21,8 @@ func newAuthPostgres(db *gorm.DB) *AuthPostgres {
 }
 
 func (r *AuthPostgres) CreateUser(user todo.User) (int, error) {
-	err := r.db.Table(userTable).Create(&user).Error
-	if err != nil {
+	err := r.db.Table(userTable).Create(&user)
+	if err.Error != nil {
 		logrus.Error("couldn't create new user: ", err)
 	}
 	return user.Id, nil

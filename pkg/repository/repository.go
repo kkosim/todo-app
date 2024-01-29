@@ -13,13 +13,17 @@ type Authorization interface {
 type TodoList interface {
 	Create(userId int, list todo.TodoList) (int, error)
 	GetAll(userId int) ([]todo.TodoList, error)
-	GetById(userId int, listId int) (todo.TodoList, error)
-	Delete(userId int, listId int) error
-	Update(userId int, listId int, input todo.UpdateListInput) error
+	GetById(userId, listId int) (todo.TodoList, error)
+	Delete(userId, listId int) error
+	Update(userId, listId int, input todo.UpdateListInput) error
 }
 
 type TodoItem interface {
-	Create(userID, listId int, item todo.TodoItem) (int, error)
+	Create(listId int, item todo.TodoItem) (int, error)
+	GetAll(userId, listId int) ([]todo.TodoItem, error)
+	GetById(userId, itemId int) (todo.TodoItem, error)
+	Delete(userId, itemId int) error
+	Update(userId, itemId int, input todo.UpdateItemInput) error
 }
 
 type Repository struct {
@@ -32,5 +36,6 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
 		Authorization: newAuthPostgres(db),
 		TodoList:      NewTodoListPostgres(db),
+		TodoItem:      NewTodoItemPostgres(db),
 	}
 }
