@@ -18,17 +18,18 @@ func NewTodoListPostgres(db *gorm.DB) *TodoListPostgres {
 
 func (r *TodoListPostgres) Create(userId int, list todo.TodoList) (int, error) {
 	tx := r.db.Begin()
-	var id int
-	createListQuery := fmt.Sprintf("insert into %s (title, description) values ($1, $2) returning id", todoListsTable)
-
-	err := tx.Raw(createListQuery, list.Title, list.Description).Scan(&id).Error
+	err := tx.Table(todoListsTable).Create(&list).Error
 	if err != nil {
 		logrus.Error("couldn't create new todoList")
 		return 0, err
 	}
+	id := list.Id
 
-	createUserListQuery := fmt.Sprintf("insert into %s (user_id, list_id) values ($1, $2)", userListsTable)
-	err = tx.Exec(createUserListQuery, userId, id).Error
+	ul := todo.UserList{
+		UserId: userId,
+		ListId: id,
+	}
+	err = tx.Table(userListsTable).Create(&ul).Error
 	if err != nil {
 		tx.Rollback()
 		return 0, err
