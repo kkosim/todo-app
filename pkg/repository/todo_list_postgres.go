@@ -16,6 +16,7 @@ func NewTodoListPostgres(db *gorm.DB) *TodoListPostgres {
 	return &TodoListPostgres{db: db}
 }
 
+// Create - begins a transaction to create a new list
 func (r *TodoListPostgres) Create(userId int, list todo.TodoList) (int, error) {
 	tx := r.db.Begin()
 	err := tx.Table(todoListsTable).Create(&list).Error
@@ -41,18 +42,20 @@ func (r *TodoListPostgres) Create(userId int, list todo.TodoList) (int, error) {
 
 func (r *TodoListPostgres) GetAll(userId int) ([]todo.TodoList, error) {
 	var lists []todo.TodoList
-	query := fmt.Sprintf("select tl.id, tl.title, tl.description from %s tl inner join %s ul on "+
-		"tl.id=ul.list_id where ul.user_id=?", todoListsTable, userListsTable)
-	err := r.db.Raw(query, userId).Scan(&lists).Error
+
+	err := r.db.Table(todoListsTable+" tl").
+		Joins("inner join "+userListsTable+" ul on tl.id = ul.list_id").
+		Where("ul.user_id = ?", userId).Find(&lists).Error
 
 	return lists, err
 }
 
 func (r *TodoListPostgres) GetById(userId int, listId int) (todo.TodoList, error) {
 	var list todo.TodoList
-	query := fmt.Sprintf("select tl.id, tl.title, tl.description from %s tl inner join %s ul on "+
-		"tl.id=ul.list_id where ul.user_id=? and ul.list_id=?", todoListsTable, userListsTable)
-	err := r.db.Raw(query, userId, listId).Scan(&list).Error
+
+	err := r.db.Table(todoListsTable+" tl").
+		Joins("inner join "+userListsTable+" ul on tl.id = ul.list_id").
+		Where("ul.user_id = ? and ul.list_id = ?", userId, listId).Scan(&list).Error
 
 	return list, err
 }
@@ -61,6 +64,11 @@ func (r *TodoListPostgres) Delete(userId int, listId int) error {
 	query := fmt.Sprintf("delete from %s tl using %s ul "+
 		"where tl.id=ul.list_id and ul.user_id=? and ul.list_id=?", todoListsTable, userListsTable)
 	err := r.db.Exec(query, userId, listId).Error
+
+	//err := r.db.Table(todoListsTable+" tl").
+	//	Joins("inner join "+userListsTable+" ul on tl.id = ul.list_id").
+	//	Where("ul.user_id = ? and ul.list_id = ?", userId, listId).
+	//	Delete(&todo.TodoList{}).Error
 
 	return err
 }
